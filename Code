@@ -1,0 +1,62 @@
+#include <Servo.h>//servo header file
+Servo myServo;//creates servo object
+const int trigpin=2;//digital pin to connect the trig pin of ultrasonic sensor1
+const int echopin=3;//digital pin to connect the echo pin of ultrasonic sensor1
+const int btrigpin=4;//digital pin to connect the trig pin of ultrasonic sensor2
+const int bechopin=5;//digital pin to connect the echo pin of ultrasonic sensor2 
+const int ledr=6;//digital pin to connect the led
+const int ledy=7;//digital pin to connect the led
+const int ledg=8;//digital pin to connect the led
+long duration,bduration,distance,bdistance;//variables declared to measure the distance and duration
+int pos;//variable to change the angle of servo motor
+void setup(){
+  //assigning pin modes
+  Serial.begin(9600);
+  pinMode(trigpin,OUTPUT);
+  pinMode(echopin,INPUT);
+  pinMode(btrigpin,OUTPUT);
+  pinMode(bechopin,INPUT);
+  pinMode(ledr,OUTPUT);
+  pinMode(ledy,OUTPUT);
+  pinMode(ledg,OUTPUT);
+  myServo.attach(9);//attaches the servo on pin 9
+}
+void loop(){
+  digitalWrite(trigpin,HIGH);//sets the trig pin on high
+  delayMicroseconds(500);//stays high for 500 microseconds
+  digitalWrite(trigpin,LOW);//sets the trig pin on low
+  duration=pulseIn(echopin,HIGH);//to read the pulse length of the signal
+  distance=duration*0.0343/2;//caluclates the distance
+  //makes the respective leds glow based on the specified condition
+  if (distance>20){
+    digitalWrite(ledg,HIGH);
+  }
+  else if (distance>10 && distance<20){
+    digitalWrite(ledg,LOW);
+    digitalWrite(ledy,HIGH);
+  }
+  else if (distance<10 && distance>0){
+    digitalWrite(ledg,LOW);
+    digitalWrite(ledy,LOW);
+    digitalWrite(ledr,HIGH);
+    for (pos=0;pos<=90;pos+=10){
+      myServo.write(pos);//to rotate the servo motor
+      delayMicroseconds(100);
+    }
+  }
+  else{
+    digitalWrite(btrigpin,HIGH);
+    delayMicroseconds(500);
+    digitalWrite(btrigpin,LOW);
+    bduration=pulseIn(bechopin,HIGH);
+    bdistance=bduration*0.0343/2;
+    if (bdistance>10){
+      digitalWrite(ledg,HIGH);
+      for (pos=90;pos>=0;pos-=10){
+        myServo.write(pos);
+        delayMicroseconds(100);
+      }
+    }
+  }
+}
+
